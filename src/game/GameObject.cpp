@@ -2161,7 +2161,7 @@ void GameObject::TickCapturePoint()
         if (OutdoorPvP* outdoorPvP = sOutdoorPvPMgr.GetScript((*capturingPlayers.begin())->GetCachedZoneId()))
         {
             // Allow only certain events to be handled by other script engines
-            if (outdoorPvP->HandleEvent(eventId, this))
+            if (outdoorPvP->HandleEvent(eventId, this, this))
                 return;
         }
 

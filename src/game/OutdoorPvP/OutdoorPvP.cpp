@@ -58,17 +58,40 @@ void OutdoorPvP::HandlePlayerLeaveZone(Player* player, bool isMainZone)
 
    @param   world state to update
    @param   new world state value
+   @param   members only flag (default false)
  */
-void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value)
+void OutdoorPvP::SendUpdateWorldState(uint32 field, uint32 value, bool membersOnly /*= true*/)
 {
     for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
         // only send world state update to main zone
         if (!itr->second)
             continue;
+        
+        if (membersOnly && !IsMember(itr->first))
+            continue;
 
         if (Player* player = sObjectMgr.GetPlayer(itr->first))
             player->SendUpdateWorldState(field, value);
+    }
+}
+
+/**
+   Function that updates world state for all the players in an outdoor pvp map
+
+   @param   world state it to update
+   @param   value which should update the world state
+   @param   map specified
+ */
+void OutdoorPvP::SendUpdateWorldStateForMap(uint32 uiField, uint32 uiValue, Map* map)
+{
+    Map::PlayerList const& pList = map->GetPlayers();
+    for (Map::PlayerList::const_iterator itr = pList.begin(); itr != pList.end(); ++itr)
+    {
+        if (!itr->getSource() || !itr->getSource()->IsInWorld())
+            continue;
+
+        itr->getSource()->SendUpdateWorldState(uiField, uiValue);
     }
 }
 
@@ -107,18 +130,28 @@ void OutdoorPvP::HandlePlayerKill(Player* killer, Unit* victim)
     }
 }
 
-// apply a team buff for the main and affected zones
-void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/)
+// apply a team buff for the main and affected zones (or specific area)
+void OutdoorPvP::BuffTeam(Team team, uint32 spellId, bool remove /*= false*/, bool membersOnly /*= true*/, uint32 area /*= 0*/)
 {
+    //(team == TEAM_NONE || (*itr)->GetTeam() == team) && (!onlyMembers || IsMember((*itr)->GetObjectGuid()))
     for (GuidZoneMap::iterator itr = m_zonePlayers.begin(); itr != m_zonePlayers.end(); ++itr)
     {
+        if (membersOnly && !IsMember(itr->first))
+            continue;
+
         Player* player = sObjectMgr.GetPlayer(itr->first);
-        if (player && player->GetTeam() == team)
+        if (player && (team == TEAM_NONE || player->GetTeam() == team))
         {
-            if (remove)
-                player->RemoveAurasDueToSpell(spellId);
-            else
-                player->CastSpell(player, spellId, true);
+            uint32 zoneId, areaId;
+            player->GetZoneAndAreaId(zoneId, areaId);
+
+            if (!area || zoneId == area || areaId == area)
+            {
+                if (remove)
+                    player->RemoveAurasDueToSpell(spellId);
+                else
+                    player->CastSpell(player, spellId, true);
+            }
         }
     }
 }

@@ -90,11 +90,17 @@ class OutdoorPvPMgr
         // load all outdoor pvp scripts
         void InitOutdoorPvP();
 
-        // called when a player enters an outdoor pvp area
+        // called whenever player enters new zone
         void HandlePlayerEnterZone(Player* player, uint32 zoneId);
 
-        // called when player leaves an outdoor pvp area
+        // called whenever player leaves old zone
         void HandlePlayerLeaveZone(Player* player, uint32 zoneId);
+
+        // called whenever player enters new area
+        void HandlePlayerEnterArea(Player* player, uint32 zoneId, uint32 areaId);
+
+        // called whenever player leaves old area
+        void HandlePlayerLeaveArea(Player* player, uint32 zoneId, uint32 areaId);
 
         // return assigned outdoor pvp script
         OutdoorPvP* GetScript(uint32 zoneId);

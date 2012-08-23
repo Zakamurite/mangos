@@ -58,8 +58,8 @@ class OutdoorPvP
         // called when the zone is initialized
         virtual void FillInitialWorldStates(WorldPacket& /*data*/, uint32& /*count*/) {}
 
-        // Process Capture event
-        virtual bool HandleEvent(uint32 /*eventId*/, GameObject* /*go*/) { return false; }
+        // Process event
+        virtual bool HandleEvent(uint32 /*eventId*/, WorldObject* /*source*/, WorldObject* /*invoker*/) { return false; }
 
         // handle capture objective complete
         virtual void HandleObjectiveComplete(uint32 /*eventId*/, std::list<Player*> /*players*/, Team /*team*/) {}
@@ -80,6 +80,9 @@ class OutdoorPvP
         // called when a player drops a flag
         virtual bool HandleDropFlag(Player* /*player*/, uint32 /*spellId*/) { return false; }
 
+        // called to check if a player takes part in outdoor pvp
+        virtual bool IsMember(ObjectGuid guid) { return true; }
+
         // update - called by the OutdoorPvPMgr
         virtual void Update(uint32 /*diff*/) {}
 
@@ -92,6 +95,9 @@ class OutdoorPvP
         virtual void HandlePlayerEnterZone(Player* /*player*/, bool /*isMainZone*/);
         virtual void HandlePlayerLeaveZone(Player* /*player*/, bool /*isMainZone*/);
 
+        virtual void HandlePlayerEnterArea(Player* /*player*/, uint32 /*areaId*/) { };
+        virtual void HandlePlayerLeaveArea(Player* /*player*/, uint32 /*areaId*/) { };
+
         // remove world states
         virtual void SendRemoveWorldStates(Player* /*player*/) {}
 
@@ -99,10 +105,13 @@ class OutdoorPvP
         virtual void HandlePlayerKillInsideArea(Player* /*killer*/, Unit* /*victim*/) {}
 
         // send world state update to all players present
-        void SendUpdateWorldState(uint32 field, uint32 value);
+        void SendUpdateWorldState(uint32 field, uint32 value, bool membersOnly = true);
+
+        // send world state update to all players present in specified map
+        void SendUpdateWorldStateForMap(uint32 uiField, uint32 uiValue, Map* map);
 
         // applies buff to a team inside the specific zone
-        void BuffTeam(Team team, uint32 spellId, bool remove = false);
+        void BuffTeam(Team team, uint32 spellId, bool remove = false, bool membersOnly = true, uint32 area = 0);
 
         // get banner artkit based on controlling team
         uint32 GetBannerArtKit(Team team, uint32 artKitAlliance = CAPTURE_ARTKIT_ALLIANCE, uint32 artKitHorde = CAPTURE_ARTKIT_HORDE, uint32 artKitNeutral = CAPTURE_ARTKIT_NEUTRAL);

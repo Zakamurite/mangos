@@ -6666,8 +6666,6 @@ uint32 Player::GetLevelFromDB(ObjectGuid guid)
 
 void Player::UpdateArea(uint32 newArea)
 {
-    m_areaUpdateId    = newArea;
-
     AreaTableEntry const* area = GetAreaEntryByAreaID(newArea);
 
     // FFA_PVP flags are area and not zone id dependent
@@ -6695,6 +6693,11 @@ void Player::UpdateArea(uint32 newArea)
         /* if ((area->flags & AREA_FLAG_OUTDOOR_PVP) && IsFreeFlying() && <WINTERGRASP_BATTLE_IN_PROGRESS> && !isGameMaster())
             CastSpell(this, 58730, true); */
     }
+
+    sOutdoorPvPMgr.HandlePlayerLeaveArea(this, m_zoneUpdateId, m_areaUpdateId);
+    sOutdoorPvPMgr.HandlePlayerEnterArea(this, m_zoneUpdateId, newArea);
+
+    m_areaUpdateId = newArea;
 
     UpdateAreaDependentAuras();
 }

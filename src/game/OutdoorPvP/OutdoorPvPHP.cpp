@@ -162,9 +162,14 @@ void OutdoorPvPHP::HandlePlayerKillInsideArea(Player* player, Unit* /*victim*/)
     }
 }
 
-// process the capture events
-bool OutdoorPvPHP::HandleEvent(uint32 eventId, GameObject* go)
+// process the events
+bool OutdoorPvPHP::HandleEvent(uint32 eventId, WorldObject* source, WorldObject* invoker)
 {
+    if (source->GetTypeId() != TYPEID_GAMEOBJECT)
+        return false;
+
+    GameObject* go = (GameObject*)source;
+
     for (uint8 i = 0; i < MAX_HP_TOWERS; ++i)
     {
         if (hellfireBanners[i] == go->GetEntry())
